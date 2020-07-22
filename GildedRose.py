@@ -1,42 +1,11 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+import tkinter
 
-import mysql.connector
-
-'''
-class GildedRose(object):
-
-    def __init__(self, items):
-        self.items = items
-
-
-class Quality(ABC):
-    @abstractmethod
-    def updateQuality(self, sell_in):
-        pass
-
-
-class RegularQuality(Quality):
-    def updateQuality(self, sell_in):
-        
-
-
-class Item_AbstractBridge(ABC):
-    def __init__(self, sell_in, quality: Quality):
-        self.__sell_in = sell_in
-        self.__quality = quality
-
-    def __repr__(self):
-        return "%s, %s, %s" % (self.name, self.sell_in, self.quality)
-
-class RegularItem(Item_AbstractBridge):
-class AgedBrieItem(Item_AbstractBridge):
-class SulfurasItem(Item_AbstractBridge):
-class BackstagePassesItem(Item_AbstractBridge):
-class ConjuredItem(Item_AbstractBridge):
-'''
 class Quality(ABC):
     def __init__(self, qualityValue):
+        self.qualityValue = qualityValue
+
+    def setQualityValue(self, qualityValue):
         self.qualityValue = qualityValue
 
     @abstractmethod
@@ -63,8 +32,7 @@ class AgedBrie_Quality(Quality):
 
 class Sulfuras_Quality(Quality):
     def updateQuality(self):
-        self.qualityValue = 80
-
+        return
 class Conjured_Quality(Quality):
     def updateQuality(self):
         self.qualityValue -= 2
@@ -76,17 +44,22 @@ class BackstagePasses_Quality(Quality):
     def updateQuality(self, sell_in):
         if sell_in <= 10 and sell_in > 5:
             self.qualityValue += 2
-        elif sell_in <= 5:
+        elif sell_in <= 5 and sell_in >0:
             self.qualityValue += 3
+
+        elif sell_in == 0:
+            self.qualityValue = 0
 
         if self.qualityValue > 50:
             self.qualityValue = 50
 
 
 class Item_AbstractBridge(ABC):
-
+    @abstractmethod
+    def __init__(self, name, sell_in, quality:Quality):
+        pass
     def __repr__(self):
-        return "%s, %s, %s" % (self.name, self.sell_in, self.quality)
+        return "%s, %s, %s" % ( self.sell_in, self.quality)
 
     @abstractmethod
     def isSellDatePassed(self):
@@ -94,64 +67,69 @@ class Item_AbstractBridge(ABC):
 
 class RegularItem(Item_AbstractBridge):
     def __init__(self, name, sell_in, quality:RegularQuality):
-        self.name = name
+        self.name = "Regular"
         self.sell_in = sell_in
         self.__quality = quality
 
     def isSellDatePassed(self):
-        current_time = datetime.datetime.now()
-        if self.sell_in > current_time.day:
+        self.sell_in -= 1
+        if self.sell_in <= 0:
             self.__quality.updateQuality(2)
+        else :
+            self.__quality.updateQuality(1)
 
 class AgedBrieItem(Item_AbstractBridge):
     def __init__(self, name, sell_in, quality:AgedBrie_Quality):
-        self.name = name
+        self.name = "AgedBrie"
         self.sell_in = sell_in
         self.__quality = quality
 
     def isSellDatePassed(self):
-        current_time = datetime.datetime.now()
-        if self.sell_in > current_time.day:
+        self.sell_in -= 1
+        if self.sell_in <= 0:
             self.__quality.updateQuality(2)
+        else:
+            self.__quality.updateQuality(1)
 
 class SulfurasItem(Item_AbstractBridge):
     def __init__(self, name, sell_in, quality:Sulfuras_Quality):
-        self.name = name
+        self.name = "Sulfuras"
         self.sell_in = sell_in
-        self.__quality = quality
+        self.__quality = quality.setQualityValue(self,80)
 
     def isSellDatePassed(self):
-        print("do nothing") #temprory
+        return
 
 class BackstagePassesItem(Item_AbstractBridge):
     def __init__(self, name, sell_in, quality:BackstagePasses_Quality):
-        self.name = name
+        self.name = "BackstagePasses"
         self.sell_in = sell_in
         self.__quality = quality
 
 class ConjuredItem(Item_AbstractBridge):
     def __init__(self, name, sell_in, quality:Conjured_Quality):
-        self.name = name
+        self.name = "Conjured"
         self.sell_in = sell_in
         self.__quality = quality
 
-'''        
-class ManageDataBase:
-    def createDataBase(self):
-        mydb = mysql.connector.connect(
-            host="localhost",
-            user="arwa",
-            password=""
-        )
+class ManageItems:
 
-        mycursor = mydb.cursor()
+    def addItem(self, item:Item_AbstractBridge):
+        file = Files()
+        file.saveToFile(item)
 
-        mycursor.execute("CREATE DATABASE mydatabase")
-'''
+class Files:
+    def saveToFile(self, item:Item_AbstractBridge):
+        f = open("articles.txt", "a")
+        index = 0
+
+        f.write(item.__name, item.__sell_in, item.__quality)
+        index += 1
+        f.close()
+
+
 def main():
-    '''managedataBase=ManageDataBase()
-    managedataBase.createDataBase()
-    '''
+
 
 if __name__ == "__main__":
     main()
